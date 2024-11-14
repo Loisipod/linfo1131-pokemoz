@@ -18,6 +18,22 @@ define
         fun {Dummy Msg}
             {Agent State}
         end
+        fun {CannotMove Msg}
+            {Agent State}
+        end
+        fun {NewTurn Msg}
+            {Agent State}
+        end
+        fun {AttackSuccessful Msg}
+            {Agent State}
+        end
+        fun {Beam Msg}
+            {Agent State}
+        end
+        fun {MapInfo Msg}
+            {System.show 'MapInfo'}
+            {Agent State}
+        end
     in
         % TODO: complete the interface and discard and report unknown messages
         fun {$ Msg}
@@ -25,9 +41,20 @@ define
             Interface = interface(
                 %TODO: add messages
                 'dummy': Dummy
+                'CannotMove':CannotMove
+                'newturn':NewTurn
+                'attackSuccessful(Victim)':AttackSuccessful
+                'attackFailed':Dummy
+                'beaaam':Beam
+                'mapInfo':MapInfo
             )
         in
-            {Interface.Dispatch Msg}
+            if {HasFeature Interface Dispatch} then
+                {Interface.Dispatch Msg}
+            else
+                % {System.show log('Unhandle message' Dispatch)}
+                {Agent State}
+            end
         end
     end
 

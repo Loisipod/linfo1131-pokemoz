@@ -6,7 +6,7 @@ export
 define
     % TODO: Use this list to spawn trainers
     Trainers = [
-        bot(name: 'Sacha' agent: 'Trainer000Template' image: 'trainer0.gif' x: 1 y: 1 hp: 10)
+        bot(name: 'Sacha' agent: 'Trainer000Template' image: 'trainer0.gif' x: 4 y: 5 hp: 10)
         bot(name: 'Pierre' agent: 'Trainer000Template' image: 'trainer1.gif' x: 5 y: 5 hp: 10)
     ]
 
