@@ -8,6 +8,7 @@ define
     Trainers = [
         bot(name: 'Sacha' agent: 'Trainer000Template' image: 'trainer0.gif' x: 1 y: 1 hp: 10)
         bot(name: 'Pierre' agent: 'Trainer000Template' image: 'trainer1.gif' x: 5 y: 5 hp: 10)
+        bot(name: 'Dracocouille' agent: 'Trainer000Template' image: 'pokemoz/charizoz.gif' x: 10 y: 10 hp: 10)
     ]
 
     NRow = 29

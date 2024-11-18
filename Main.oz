@@ -13,7 +13,8 @@ define
         {Record.forAll Tracker proc {$ Tracked} if Tracked.alive  andthen Tracked.port \= nil then {Send Tracked.port Msg} end end}
     end
     % TODO: define here any auxiliary functions or procedures you may need
-    %...
+        
+        
 
     % TODO: Complete this concurrent functional agent to handle all the message-passing between the GUI and the Agents
     % and ensure a turn-by-turn game
@@ -105,7 +106,7 @@ define
             {Send Port moveTo(2 'north')}
         end
 
-        thread {Delay 1000} {GUI updateHp(1 5)} end
+        thread {Delay 5000} {GUI updateHp(1 5)} end
 
         Instance = {GameController state(
             'gui': GUI

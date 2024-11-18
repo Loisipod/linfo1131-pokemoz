@@ -18,6 +18,15 @@ define
         fun {Dummy Msg}
             {Agent State}
         end
+        fun {Attack Msg}
+            {Agent State}
+        end
+        fun {MoveSelf Msg}
+            {MoveTo Msg}
+        end
+        fun {LookMap Msg}
+            {Agent State}
+        end
     in
         % TODO: complete the interface and discard and report unknown messages
         fun {$ Msg}
@@ -25,6 +34,9 @@ define
             Interface = interface(
                 %TODO: add messages
                 'dummy': Dummy
+                'moveto': MoveSelf
+                'attack': Attack
+                'lookmap': LookMap
             )
         in
             {Interface.Dispatch Msg}
@@ -33,7 +45,12 @@ define
 
     % Please note: Msg | Upcoming is a pattern match of the Stream argument
     proc {Handler Msg | Upcoming Instance}
-        if Msg \= shutdown() then {Handler Upcoming {Instance Msg}} end
+        case Msg of Dummy then {Handler Upcoming Instance}
+        [] Attack then {Attack Msg}
+        [] MoveSelf then {MoveSelf Msg}
+        [] LookMap then {LookMap Msg}
+            else {Handler Upcoming Instance}
+        end
     end
 
     fun {SpawnAgent init(Id GCPort Map)}
