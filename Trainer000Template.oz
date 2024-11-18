@@ -18,13 +18,20 @@ define
         fun {Dummy Msg}
             {Agent State}
         end
-        fun {Attack Msg}
+        fun {CannotMove Msg}
             {Agent State}
         end
-        fun {MoveSelf Msg}
-            {MoveTo Msg}
+        fun {NewTurn Msg}
+            {Agent State}
         end
-        fun {LookMap Msg}
+        fun {AttackSuccessful Msg}
+            {Agent State}
+        end
+        fun {Beam Msg}
+            {Agent State}
+        end
+        fun {MapInfo Msg}
+            {System.show 'MapInfo'}
             {Agent State}
         end
     in
@@ -34,12 +41,20 @@ define
             Interface = interface(
                 %TODO: add messages
                 'dummy': Dummy
-                'moveto': MoveSelf
-                'attack': Attack
-                'lookmap': LookMap
+                'CannotMove':CannotMove
+                'newturn':NewTurn
+                'attackSuccessful(Victim)':AttackSuccessful
+                'attackFailed':Dummy
+                'beaaam':Beam
+                'mapInfo':MapInfo
             )
         in
-            {Interface.Dispatch Msg}
+            if {HasFeature Interface Dispatch} then
+                {Interface.Dispatch Msg}
+            else
+                % {System.show log('Unhandle message' Dispatch)}
+                {Agent State}
+            end
         end
     end
 

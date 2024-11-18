@@ -2,7 +2,7 @@
 # TODO: Fill your group number, your NOMAs and your names
 # group number X
 # 95922200 : Loïs Djembi
-# NOMA2 : NAME2
+# 71312200 : Julien Renard
 # ----------------------------
 UNAME_S := $(shell powershell -Command "(Get-WmiObject Win32_OperatingSystem).Name")
 
