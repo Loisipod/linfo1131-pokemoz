@@ -1,20 +1,18 @@
 # ----------------------------
 # TODO: Fill your group number, your NOMAs and your names
 # group number X
-# 95922200 : Loïs Djembi
-# 71312200 : Julien Renard
+# NOMA1 : NAME1
+# NOMA2 : NAME2
 # ----------------------------
-UNAME_S := $(shell powershell -Command "(Get-WmiObject Win32_OperatingSystem).Name")
-
-ifeq ($(findstring Windows, $(UNAME_S)), Windows)
-    OZC = ozc
-    OZENGINE = ozengine
-    RM = del /Q
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+	OZC = /Applications/Mozart2.app/Contents/Resources/bin/ozc
+	OZENGINE = /Applications/Mozart2.app/Contents/Resources/bin/ozengine
 else
-    OZC = /Applications/Mozart2.app/Contents/Resources/bin/ozc
-    OZENGINE = /Applications/Mozart2.app/Contents/Resources/bin/ozengine
-    RM = rm -rf
+	OZC = ozc
+	OZENGINE = ozengine
 endif
+# TODO: Change these parameters as you wish
 
 all:
 	$(OZC) -c Input.oz -o "Input.ozf"
@@ -22,9 +20,7 @@ all:
 	$(OZC) -c AgentManager.oz
 	$(OZC) -c Graphics.oz
 	$(OZC) -c Main.oz
-
 run:
 	$(OZENGINE) Main.ozf
-
 clean:
-	$(RM) *.ozf
+	rm -rf *.ozf

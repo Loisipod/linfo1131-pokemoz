@@ -6,85 +6,27 @@ import
 export
     'getPort': SpawnAgent
 define
-    PokemOzList
-    Surround
-    TrainersList
-    TurnNr
-    Hp
-    SHp
-    Trainers
-    Timer
-    GCPort
-    State
 
     % Feel free to modify it as much as you want to build your own agents :) !
 
     % Helper => returns an integer between [0, N]
     fun {GetRandInt N} {OS.rand} mod N end
-
-    % Helper => returns the id of first trainer or (if no trainer is in range) pokemoz in range
-    fun {TrainerAround Surround}
-        case Surround of nil then
-            ~1
-        [] trainer(Id) | _ then
-            Id
-        [] _ | Rest then
-            {TrainerAround Rest}
-        end
-    end
-        
-    fun {PokemozAround Surround}
-        case Surround of nil then
-            ~1
-        [] pokemoz(Id) | _ then
-            Id
-        [] _ | Rest then
-            {TrainerAround Rest}
-        end
-    end
-
-    fun {ClosestTarget type}
-        if type == pokemoz then
-            {GetRandInt {Length State.PokemOzList}-1}
-        else
-            {GetRandInt {Length State.TrainersList}-1}
-        end
-    end
     
-    
-    fun {FindPath TargetX TargetY}
-        if {Abs (State.id.x-TargetX)} < {Abs (State.id.y-TargetY)} then
-            if (State.id.x-TargetX) < 0 then
-                'east'
-            else 'west'
-            end
-        else
-            if {State.id.y-TargetY} < 0 then
-                'south'
-            else 'north'
-            end
-        end
-    end
-    
-     
-
     % TODO: Complete this concurrent functional agent
     fun {Agent State}
         %TODO: add functions to handle messages
-        fun {AttackFailed Msg}
-            {Agent {AdjoinAt State state {AdjoinAt State.state action {Adjoin State.state.action 1}}}}
+        fun {Dummy Msg}
+            {Agent State}
         end
-
         fun {CannotMove Msg}
-            {Agent {AdjoinAt State state {AdjoinAt State.state action {Adjoin State.state.action 1}}}}
+            {Agent State}
         end
         fun {AttackSuccessful Msg}
-            case State.state 
-            of aggressive() then {Agent {AdjoinAt State state {Adjoin State.state aggressive(Hp:State.state.Hp timer:0 action:1)}}}
-            else {Agent {AdjoinAt State state {AdjoinAt State.state action {Adjoin State.state.action 1}}}}
-            end
+            {Agent State}
         end
-
+        fun {Beam Msg}
+            {Agent State}
+        end
         fun {MapInfo Msg}
             {Agent State}
         end
@@ -116,6 +58,7 @@ define
             Dispatch = {Label Msg}
             Interface = interface(
                 %TODO: add messages
+                'dummy': Dummy
                 'CannotMove':CannotMove
                 'newturn':NewTurn
                 'attackSuccessful(Victim)':AttackSuccessful
@@ -128,7 +71,7 @@ define
             if {HasFeature Interface Dispatch} then
                 {Interface.Dispatch Msg}
             else
-                % {System.show log('Unhandled message' Dispatch)}
+                % {System.show log('Unhandle message' Dispatch)}
                 {Agent State}
             end
         end
@@ -136,7 +79,7 @@ define
 
     % Please note: Msg | Upcoming is a pattern match of the Stream argument
     proc {Handler Msg | Upcoming Instance}
-        {Handler Upcoming {Instance Msg}}
+        if Msg \= shutdown() then {Handler Upcoming {Instance Msg}} end
     end
 
     fun {SpawnAgent init(Id GCPort Map)}
@@ -145,13 +88,7 @@ define
 
         Instance = {Agent state(
             'id': Id
-            'turnnr': TurnNr
-            'map': Map
-            'surround': Surround
-            'pokemozlist': PokemOzList
-            'trainerslist': TrainersList
             'gcport': GCPort
-            'state': neutral(Hp:10 SHp:10 action:0)
         )}
     in 
         % {Send GCPort test()}
