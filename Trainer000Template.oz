@@ -21,9 +21,6 @@ define
         fun {CannotMove Msg}
             {Agent State}
         end
-        fun {NewTurn Msg}
-            {Agent State}
-        end
         fun {AttackSuccessful Msg}
             {Agent State}
         end
@@ -31,11 +28,32 @@ define
             {Agent State}
         end
         fun {MapInfo Msg}
-            {System.show 'MapInfo'}
+            {Agent State}
+        end
+        fun {NewTurn X}
             {Agent State}
         end
     in
-        % TODO: complete the interface and discard and report unknown messages
+            % {Send State.gcport moveTo(State.id 'east')}
+            % {Send State.gcport moveTo(State.id 'south')}
+            % {Send State.gcport moveTo(State.id 'west')}
+            % {Delay 1000}
+            % {Send State.gcport attack(1 5 2)}
+            % {Delay 1000}
+            % {Send State.gcport moveTo(1 'north')}
+            % {Delay 1000}
+            % {Send State.gcport beamAttack(1 10 'east')}
+            % {Delay 1000}
+            % {Send State.gcport moveTo(1 'north')}
+            % {Delay 1000}
+            % {Send State.gcport moveTo(1 'east')}
+            % {Delay 1000}
+            % {Send State.gcport attack(1 5 2)}
+            % {Delay 1000}
+            % {Send State.gcport moveTo(1 'east')}
+            % {Delay 1000}
+            % {Send State.gcport moveTo(1 'north')}
+            % TODO: complete the interface and discard and report unknown messages
         fun {$ Msg}
             Dispatch = {Label Msg}
             Interface = interface(
@@ -44,9 +62,10 @@ define
                 'CannotMove':CannotMove
                 'newturn':NewTurn
                 'attackSuccessful(Victim)':AttackSuccessful
-                'attackFailed':Dummy
+                'attackFailed':Beam
                 'beaaam':Beam
                 'mapInfo':MapInfo
+                'newTurn':NewTurn
             )
         in
             if {HasFeature Interface Dispatch} then
@@ -71,7 +90,20 @@ define
             'id': Id
             'gcport': GCPort
         )}
-    in
+    in 
+        % {Send GCPort test()}
+        thread
+        if Id==2 then {Send GCPort attack(Id 5 1)}{Send GCPort moveTo(Id 'north')}{Send GCPort moveTo(Id 'east')}{Send GCPort attack(Id 3 2)}{Send GCPort attack(Id 3 2)}
+            
+    elseif Id==1 then {Send GCPort attack(Id 1 2)}{Send GCPort moveTo(Id 'west')} {Send GCPort attack(Id 2 2)}{Send GCPort attack(Id 3 2)}{Send GCPort attack(Id 4 2)} 
+        {Send GCPort attack(Id 1 2)} {Send GCPort attack(Id 2 2)} else skip end
+end
+        % for I in 1..10 do
+        %     {Send GCPort moveTo(Id 'west')}
+        %     {Send GCPort moveTo(Id 'south')}
+        %     {Send GCPort moveTo(Id 'east')}
+        %     {Send GCPort moveTo(Id 'north')}
+        % end
         thread {Handler Stream Instance} end
         Port
     end
