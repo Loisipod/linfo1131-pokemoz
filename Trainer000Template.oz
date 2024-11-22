@@ -119,8 +119,8 @@ define
                 'CannotMove':CannotMove
                 'newturn':NewTurn
                 'attackSuccessful(Victim)':AttackSuccessful
-                'attackFailed':Beam
-                'beaaam':Beam
+                'attackFailed':AttackFailed
+                %'beaaam':Beam
                 'mapInfo':MapInfo
                 'newTurn':NewTurn
             )
