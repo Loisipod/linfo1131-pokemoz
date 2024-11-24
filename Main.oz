@@ -97,6 +97,7 @@ define
         if TurnNr+2 > 0 then
             {AddPokemozRandom Port Map}
             {Send Port newturn(turn:TurnNr)}
+            {Delay 600}
             if {AllReady StreamActionRecord {Cell.access TrainersAlive}}==false then
                 {Delay 1000}
             else skip end
@@ -177,7 +178,7 @@ define
     end
     fun {AllSurround State TrainerList}
         fun {Surround State Id} S1 S2 S3 S4 S5 S6 S7
-            Surround = surround()
+            Surround = surroundings()
             Position = {GetPosition State.trainers Id}
             AllBots = {AppendList {Record.toList State.trainers} {Record.toList State.pokemozs}}
             fun {IsOccupied Position BotList}
@@ -193,22 +194,22 @@ define
                 end
             end
         in
-            S1 = {Adjoin Surround surround(north:{IsOccupied Position-28 AllBots})}
-            S2 = {Adjoin S1 surround(ne:{IsOccupied Position-27 AllBots})}
-            S3 = {Adjoin S2 surround(east:{IsOccupied Position+1 AllBots})}
-            S4 = {Adjoin S3 surround(se:{IsOccupied Position+29 AllBots})}
-            S5 = {Adjoin S4 surround(south:{IsOccupied Position+28 AllBots})}
-            S6 = {Adjoin S5 surround(sw:{IsOccupied Position+27 AllBots})}
-            S7 = {Adjoin S6 surround(west:{IsOccupied Position-1 AllBots})}
-            {Adjoin S7 surround(nw:{IsOccupied Position-29 AllBots})}
+            S1 = {Adjoin Surround surroundings(north:{IsOccupied Position-28 AllBots})}
+            S2 = {Adjoin S1 surroundings(ne:{IsOccupied Position-27 AllBots})}
+            S3 = {Adjoin S2 surroundings(east:{IsOccupied Position+1 AllBots})}
+            S4 = {Adjoin S3 surroundings(se:{IsOccupied Position+29 AllBots})}
+            S5 = {Adjoin S4 surroundings(south:{IsOccupied Position+28 AllBots})}
+            S6 = {Adjoin S5 surroundings(sw:{IsOccupied Position+27 AllBots})}
+            S7 = {Adjoin S6 surroundings(west:{IsOccupied Position-1 AllBots})}
+            {Adjoin S7 surroundings(nw:{IsOccupied Position-29 AllBots})}
         end
         fun {MakeRecord State TrainerList AllSurround}
             case TrainerList of H|T then Id=H.id in
-                {MakeRecord State T {Adjoin AllSurround allSurround(Id:{Surround State Id})}}
+                {MakeRecord State T {Adjoin AllSurround surroundings(Id:{Surround State Id})}}
             else AllSurround end
         end
     in
-        {MakeRecord State TrainerList allSurround()}
+        {MakeRecord State TrainerList surroundings()}
     end
 
     proc {SendAgentsTurnInfo AgentsList TurnNr AllSurround PokemozList}
@@ -326,14 +327,14 @@ define
                     if {IsUnderAttack State ListOfRecords Id}==false andthen {IsAttackedOnce State ListOfRecords Victim 0} then 
                         {Builder State ListOfRecords T H|NewListOfRecords}
                     else 
-                        {Send State.trainers.Id.port 'AttackFailed'}
+                        {Send State.trainers.Id.port attackFailed()}
                         {Builder State ListOfRecords T NewListOfRecords}
                     end
                 [] beamAttack(Id TurnNr Dir) then
                     if {IsUnderAttack State ListOfRecords Id}==false andthen {IsAttackedOnce State ListOfRecords {FirstInLine State Dir Id} 0} then 
                         {Builder State ListOfRecords T H|NewListOfRecords}
                     else 
-                        {Send State.trainers.Id.port 'AttackFailed'}
+                        {Send State.trainers.Id.port attackFailed()}
                         {Builder State ListOfRecords T NewListOfRecords}
                     end
                 else nil end
@@ -366,7 +367,7 @@ define
             case L of H|T then
                 case H of moveTo(Id Dir)then 
                     if {IsUnique State ListOfRecords H 0} then {Builder State ListOfRecords T H|NewListOfRecords}
-                    else {Send State.trainers.Id.port 'CannotMove'}{Builder State ListOfRecords T NewListOfRecords}end
+                    else {Builder State ListOfRecords T NewListOfRecords}end
                 else nil end
             else NewListOfRecords end
         end
@@ -386,7 +387,7 @@ define
                     [] 'south' then {GameController {AdjoinAt State trainers {AdjoinAt State.trainers Id {Adjoin State.trainers.Id trainer(x:X y:Y+1)}}}}
                     [] 'east' then {GameController {AdjoinAt State trainers {AdjoinAt State.trainers Id {Adjoin State.trainers.Id trainer(x:X+1 y:Y)}}}}
                     else {GameController {AdjoinAt State trainers {AdjoinAt State.trainers Id {Adjoin State.trainers.Id trainer(x:X-1 y:Y)}}}} end
-                else {Send State.trainers.Id.port 'CannotMove'} {GameController State}end    
+                else{GameController State}end    
                 
             else
                 {System.show 'Is probably dead'}
@@ -395,10 +396,6 @@ define
         end
 
         fun {MovedTo movedTo(Id Type X Y)}
-            % case Type of 'trainer' then 
-            %     {GameController {AdjoinAt State trainers {AdjoinAt State.trainers Id {Adjoin State.trainers.Id trainer(x:X y:Y)}}}}
-            %     []'pokemoz' then {GameController State}
-            % else {GameController State} end
             {GameController State}
         end
 
@@ -406,11 +403,11 @@ define
             if {HasFeature State.trainers Id} then
                 if {HasFeature {Adjoin State.trainers State.pokemozs} Victim} then
                     if {IsAround State Victim {GetPosition State.trainers Id}} then
-                        {Send State.trainers.Id.port 'attackSuccessful(Victim)'}
+                        {Send State.trainers.Id.port attackSuccessful(Victim)}
                         case {Record.label {Adjoin State.trainers State.pokemozs}.Victim} of 'trainer' then
                             if State.trainers.Victim.hp-1==0 then Cell = State.trainersAlive Liste = @Cell NewState in
                                 {State.gui updateHp(Victim State.trainers.Victim.hp-1)}
-                                thread {Delay 1000} {State.gui dispawnBot(Victim)}end
+                                thread {Delay 100} {State.gui dispawnBot(Victim)}end
                                 Cell:= {Delete Liste Victim} 
                                 NewState = {Adjoin State state(map:{ReplaceNth State.map 0 {GetPosition State.trainers Victim}})}
                                 {GameController {AdjoinAt NewState trainers {Record.subtract NewState.trainers Victim}}}
@@ -421,7 +418,7 @@ define
                         else 
                             if State.pokemozs.Victim.hp-1==0 then NewState in
                                 {State.gui updateHp(Victim State.pokemozs.Victim.hp-1)}
-                                thread {Delay 1000} {State.gui dispawnBot(Victim)}end
+                                thread {Delay 100} {State.gui dispawnBot(Victim)}end
                                 {State.gui updateHp(Id State.trainers.Id.hp + State.pokemozs.Victim.level)}
                                 NewState = {AdjoinAt State trainers {AdjoinAt State.trainers Id {Adjoin State.trainers.Id trainer(hp:State.trainers.Id.hp + State.pokemozs.Victim.level)}}}
                                 {GameController {AdjoinAt NewState pokemozs {Record.subtract NewState.pokemozs Victim}}}
@@ -431,11 +428,11 @@ define
                             end
                         end
                     else 
-                        {Send State.trainers.Id.port 'attackFailed'}
+                        {Send State.trainers.Id.port attackFailed()}
                         {GameController State}
                     end
                 else 
-                    {Send State.trainers.Id.port 'attackFailed'}
+                    {Send State.trainers.Id.port attackFailed()}
                     {GameController State}
                 end
             else
@@ -449,13 +446,13 @@ define
             if {HasFeature State.trainers Id} then 
                 Victim={FirstInLine State Dir Id}
                 if Victim==nil then
-                    {Send State.trainers.Id.port 'attackFailed'}
+                    {Send State.trainers.Id.port attackSuccessful(Victim)}
                     {GameController State}
                 else 
                     {Send State.trainers.Id.port 'beaaam'}
                     if State.trainers.Victim.hp-1==0 then Cell = State.trainersAlive Liste = @Cell NewState in
                         {State.gui updateHp(Victim State.trainers.Victim.hp-1)}
-                        thread {Delay 1000}{State.gui dispawnBot(Victim)}end
+                        thread {Delay 100}{State.gui dispawnBot(Victim)}end
                         Cell:= {Delete Liste Victim}
                         NewState = {Adjoin State state(map:{ReplaceNth State.map 0 {GetPosition State.trainers Victim}})}
                         {GameController {AdjoinAt NewState trainers {Record.subtract NewState.trainers Victim}}}
@@ -469,15 +466,21 @@ define
                 {GameController State}
             end
         end
-
+        fun {HpPosOnly TrainersList NewList}
+            case TrainersList of H|T then
+                {HpPosOnly T trainer(hp:H.hp x:H.x y:H.y id:H.id name:H.name)|NewList}
+            else NewList end
+        end
+        % envoie un record contenant la map d'origine et une liste de trainers sans le trainer qui demande les informations
         fun {LookMap lookMap(Id TurnNr)}
-            if {HasFeature State.trainers Id} then 
-                {Send State.trainers.Id.port mapInfo(State.map {Record.toList State.trainers})}
+            if {HasFeature State.trainers Id} then NewState = {AdjoinAt State trainers {Record.subtract State.trainers Id}} in
+                {Send State.trainers.Id.port mapInfo(State.map {HpPosOnly {Record.toList NewState.trainers} nil})}
             else 
                 {System.show 'n existe pas'}
             end
             {GameController State} 
         end
+        
 
         fun {AddPokemoz addpokemoz(Name Image X Y Hp)} 
             Id Pokemoz
@@ -495,15 +498,19 @@ define
                 end
             end
         in
-            if {IsOccupied X+Y*28 AllBots}=='empty' then
-                Id={State.gui spawnBot('pokemoz' Name Image X Y Hp $)}
-                Pokemoz = pokemoz(id:Id name:Name x:X y:Y level:Hp hp:Hp)
-                {GameController {AdjoinAt State pokemozs {Adjoin State.pokemozs pokemozs(Id:Pokemoz)}}}
+            if {Len {Record.toList State.pokemozs}} < 30 then 
+                if {IsOccupied X+Y*28 AllBots}=='empty' then
+                    Id={State.gui spawnBot('pokemoz' Name Image X Y Hp $)}
+                    Pokemoz = pokemoz(id:Id name:Name x:X y:Y level:Hp hp:Hp)
+                    {GameController {AdjoinAt State pokemozs {Adjoin State.pokemozs pokemozs(Id:Pokemoz)}}}
+                else {GameController State} end
             else {GameController State} end
         end
 
         fun {SendNewTurnInfo sendNewTurnInfo(turn:TurnNr)}
-            {SendAgentsTurnInfo {Record.toList State.trainers} TurnNr {AllSurround State {Record.toList State.trainers}} {Record.toList State.pokemozs}}
+            if TurnNr >= 0 then 
+                {SendAgentsTurnInfo {Record.toList State.trainers} TurnNr {AllSurround State {Record.toList State.trainers}} {Record.toList State.pokemozs}}
+            else skip end
             {GameController {Adjoin State state(turnNr:TurnNr)}}
         end
         
@@ -580,7 +587,7 @@ define
                 [] 'moveTo' then {Handler Upcoming {Adjoin R turnActions(moves:Msg|R.moves)} Instance}
                 [] 'attack' then {Handler Upcoming {Adjoin R turnActions(attacks:Msg|R.attacks)} Instance}
                 [] 'beamAttack' then {Handler Upcoming {Adjoin R turnActions(attacks:Msg|R.attacks)} Instance}
-                [] 'lookmap' then {Handler Upcoming {Adjoin R turnActions(lookmap:Msg|R.lookmap)} Instance}
+                [] 'lookMap' then {Handler Upcoming {Adjoin R turnActions(lookmap:Msg|R.lookmap)} Instance}
                 else {Handler Upcoming R {Instance Msg}} end
             else {System.show 'buggy'}skip end
     end
