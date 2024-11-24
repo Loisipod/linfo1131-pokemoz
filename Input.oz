@@ -12,9 +12,9 @@ export
 define
     % TODO: Use this list to spawn trainers
     Trainers = [
-        bot(name: 'Sacha' agent: 'Trainer000Template' image: 'trainer0.gif' x: 11 y: 4 hp: 10)
-        bot(name: 'Pierre' agent: 'Trainer000Template' image: 'trainer1.gif' x: 10 y: 5 hp: 3)
-        bot(name: 'Ondine' agent: 'Trainer000Template' image: 'trainer2.gif' x: 7 y: 4 hp: 9)
+        bot(name: 'Sacha' agent: 'Trainer000Template' image: 'trainer0.gif' x: 20 y: 4 hp: 10)
+        bot(name: 'Pierre' agent: 'Trainer000Template' image: 'trainer1.gif' x: 2 y: 14 hp: 10)
+        bot(name: 'Ondine' agent: 'Trainer000Template' image: 'trainer2.gif' x: 19 y: 25 hp: 10)
     ]
 
     NRow = 29
@@ -51,7 +51,7 @@ define
     %     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
     % ]
 
-    MaxTurns = 10
+    MaxTurns = 100
 
     TurnTime = 1000
     
@@ -90,7 +90,7 @@ define
             1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
         ]
         fun {GetRandInt N} {OS.rand} mod N end
-        NumberOfWall = {GetRandInt 100}+25
+        NumberOfWall = {GetRandInt 75}+25
         fun {Nth L N}
             if N<0 then nil 
             else
@@ -121,7 +121,7 @@ define
         fun {AddInEmptyPlace Map Number} X in
             if Number==0 then Map
             else
-                X={GetRandInt 750}
+                X={GetRandInt 754}+29
                 if {Nth Map X}==0 then 
                     {AddInEmptyPlace {ReplaceNth Map 1 X} Number-1}
                 else
